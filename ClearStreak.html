@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Clear Streak">
+<meta name="theme-color" content="#0a0a0a">
+<title>Clear Streak</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f0;
+    --muted: #888;
+    --dim: #555;
+    --accent: #3ecf8e;
+    --accent-dim: rgba(62,207,142,0.12);
+    --accent-border: rgba(62,207,142,0.3);
+    --danger: #e05252;
+    --danger-dim: rgba(224,82,82,0.1);
+    --danger-border: rgba(224,82,82,0.3);
+    --info: #5b9cf6;
+    --info-dim: rgba(91,156,246,0.1);
+    --info-border: rgba(91,156,246,0.25);
+  }
+
+  html { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; -webkit-font-smoothing: antialiased; }
+
+  body { min-height: 100vh; padding: env(safe-area-inset-top, 16px) 0 env(safe-area-inset-bottom, 24px); }
+
+  #app { max-width: 420px; margin: 0 auto; padding: 24px 20px 48px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 28px; padding-top: 8px; }
+  .header h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; }
+  .header p { font-size: 12px; color: var(--dim); margin-top: 5px; letter-spacing: 0.04em; }
+
+  /* Counter */
+  .counter-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px 20px 22px; text-align: center; margin-bottom: 14px; }
+  .counter-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px; }
+  .unit { display: flex; flex-direction: column; align-items: center; }
+  .unit-num { font-size: 36px; font-weight: 300; color: var(--text); line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .unit-label { font-size: 9px; color: var(--dim); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .sep { font-size: 28px; font-weight: 200; color: var(--dim); align-self: flex-start; padding-top: 4px; display: none; }
+  .since-label { font-size: 11px; color: var(--muted); letter-spacing: 0.02em; }
+
+  /* Motivation */
+  .motivation { background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; font-size: 13px; color: var(--accent); text-align: center; line-height: 1.55; }
+
+  /* Next milestone */
+  .next-box { background: var(--info-dim); border: 1px solid var(--info-border); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; text-align: center; }
+  .next-eyebrow { font-size: 10px; color: var(--info); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .next-name { font-size: 17px; font-weight: 500; color: var(--info); margin-bottom: 2px; }
+  .next-rem { font-size: 12px; color: rgba(91,156,246,0.65); }
+
+  /* Milestones */
+  .section-label { font-size: 10px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; }
+  .milestone-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-radius: 10px; margin-bottom: 7px; border: 1px solid var(--border); background: var(--surface); transition: background 0.2s, border-color 0.2s; }
+  .milestone-row.done { background: rgba(62,207,142,0.07); border-color: rgba(62,207,142,0.25); }
+  .m-left { display: flex; align-items: center; gap: 10px; }
+  .m-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; background: var(--surface2); color: var(--dim); flex-shrink: 0; }
+  .milestone-row.done .m-icon { background: rgba(62,207,142,0.15); color: var(--accent); }
+  .m-name { font-size: 14px; color: var(--muted); }
+  .milestone-row.done .m-name { color: var(--text); font-weight: 500; }
+  .m-badge { font-size: 10px; color: var(--accent); background: rgba(62,207,142,0.12); border-radius: 6px; padding: 2px 7px; }
+
+  /* Divider */
+  .divider { height: 1px; background: var(--border); margin: 22px 0; }
+
+  /* Reset */
+  .reset-btn { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--danger-border); background: transparent; color: var(--danger); font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; letter-spacing: 0.02em; -webkit-tap-highlight-color: transparent; }
+  .reset-btn:active { background: var(--danger-dim); }
+
+  .confirm-box { background: var(--danger-dim); border: 1px solid var(--danger-border); border-radius: 12px; padding: 16px; margin-top: 12px; text-align: center; }
+  .confirm-box p { font-size: 13px; color: var(--danger); margin-bottom: 14px; line-height: 1.5; }
+  .confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .confirm-btns button { padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; border: 1px solid; }
+  .btn-yes { background: var(--danger-dim); border-color: var(--danger-border); color: var(--danger); }
+  .btn-no { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+  .btn-yes:active { background: rgba(224,82,82,0.22); }
+  .btn-no:active { background: rgba(255,255,255,0.06); }
+
+  /* History */
+  .history-section { margin-top: 20px; }
+  .history-row { font-size: 12px; color: var(--dim); padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+  .history-row:last-child { border-bottom: none; }
+  .no-history { font-size: 12px; color: var(--dim); text-align: center; padding: 8px 0; }
+
+  /* How to install banner */
+  .install-hint { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .install-hint strong { color: var(--text); font-weight: 500; }
+  .install-hint .close-hint { float: right; color: var(--dim); cursor: pointer; font-size: 16px; line-height: 1; margin-left: 8px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="header">
+    <h1>Clear Streak</h1>
+    <p>time since last use</p>
+  </div>
+
+  <div id="install-hint" class="install-hint" style="display:none;">
+    <span class="close-hint" onclick="dismissHint()">✕</span>
+    <strong>Add to Home Screen:</strong> Tap the Share button in Safari, then choose "Add to Home Screen" to use this like an app.
+  </div>
+
+  <div class="counter-card">
+    <div class="counter-grid">
+      <div class="unit"><span class="unit-num" id="days">0</span><span class="unit-label">days</span></div>
+      <div class="unit"><span class="unit-num" id="hours">0</span><span class="unit-label">hrs</span></div>
+      <div class="unit"><span class="unit-num" id="minutes">0</span><span class="unit-label">min</span></div>
+      <div class="unit"><span class="unit-num" id="seconds">0</span><span class="unit-label">sec</span></div>
+    </div>
+    <div class="since-label" id="since-label">starting now</div>
+  </div>
+
+  <div class="motivation" id="motivation-text">Every hour counts. You're already doing it.</div>
+
+  <div class="next-box" id="next-box">
+    <div class="next-eyebrow">next milestone</div>
+    <div class="next-name" id="next-name">24 hours</div>
+    <div class="next-rem" id="next-rem">calculating...</div>
+  </div>
+
+  <div class="section-label">milestones</div>
+  <div id="milestones-list"></div>
+
+  <div class="divider"></div>
+
+  <button class="reset-btn" onclick="showConfirm()">Reset Counter</button>
+  <div class="confirm-box" id="confirm-box" style="display:none;">
+    <p>Reset your streak to zero?<br>Your reset history will be saved.</p>
+    <div class="confirm-btns">
+      <button class="btn-yes" onclick="doReset()">Yes, reset</button>
+      <button class="btn-no" onclick="hideConfirm()">Cancel</button>
+    </div>
+  </div>
+
+  <div class="history-section" id="history-section" style="display:none;">
+    <div class="divider"></div>
+    <div class="section-label">reset history</div>
+    <div id="history-list"></div>
+  </div>
+
+</div>
+
+<script>
+const MILESTONES = [
+  { label: '24 hours',  ms: 86400000,     icon: '1d',  msg: 'One full day. Your body is already clearing out.' },
+  { label: '3 days',   ms: 259200000,    icon: '3d',  msg: 'Three days. Sleep gets better. Appetite stabilizes.' },
+  { label: '1 week',   ms: 604800000,    icon: '1w',  msg: 'One week clean. Real momentum building.' },
+  { label: '2 weeks',  ms: 1209600000,   icon: '2w',  msg: 'Two weeks. Mental clarity is your new baseline.' },
+  { label: '30 days',  ms: 2592000000,   icon: '30',  msg: 'One month. This is a real lifestyle shift.' },
+  { label: '60 days',  ms: 5184000000,   icon: '60',  msg: 'Two months. You\'ve proved this is sustainable.' },
+  { label: '90 days',  ms: 7776000000,   icon: '90',  msg: 'Three months. Your brain chemistry has reset.' },
+  { label: '6 months', ms: 15552000000,  icon: '6m',  msg: 'Half a year. This is who you are now.' },
+  { label: '1 year',   ms: 31536000000,  icon: '1y',  msg: 'One full year. That\'s extraordinary.' },
+];
+
+const DEFAULT_MSGS = [
+  'Every hour counts. You\'re already doing it.',
+  'One step at a time. Stay the course.',
+  'Clarity is on the other side of this.',
+  'Your future self is watching. Don\'t quit.',
+];
+
+const KEY_START   = 'cs_start';
+const KEY_HISTORY = 'cs_history';
+const KEY_HINT    = 'cs_hint';
+
+function getStart() {
+  const v = localStorage.getItem(KEY_START);
+  if (v) return parseInt(v);
+  const now = Date.now();
+  localStorage.setItem(KEY_START, now);
+  return now;
+}
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(KEY_HISTORY) || '[]'); }
+  catch { return []; }
+}
+
+function pad(n) { return String(Math.floor(n)).padStart(2, '0'); }
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    + ' at ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
+
+function formatDuration(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  if (d > 0) return d + 'd ' + (h % 24) + 'h ' + (m % 60) + 'm';
+  if (h > 0) return h + 'h ' + (m % 60) + 'm';
+  return m + 'm ' + (s % 60) + 's';
+}
+
+function formatRemaining(ms) {
+  if (ms <= 0) return 'reached!';
+  return formatDuration(ms) + ' to go';
+}
+
+function buildMilestones(elapsed) {
+  const list = document.getElementById('milestones-list');
+  list.innerHTML = '';
+  MILESTONES.forEach(m => {
+    const done = elapsed >= m.ms;
+    const row = document.createElement('div');
+    row.className = 'milestone-row' + (done ? ' done' : '');
+    row.innerHTML = `
+      <div class="m-left">
+        <div class="m-icon">${done ? '✓' : m.icon}</div>
+        <span class="m-name">${m.label}</span>
+      </div>
+      ${done ? '<span class="m-badge">complete</span>' : ''}
+    `;
+    list.appendChild(row);
+  });
+}
+
+function buildHistory() {
+  const hist = getHistory();
+  const section = document.getElementById('history-section');
+  const list = document.getElementById('history-list');
+  if (hist.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  list.innerHTML = '';
+  hist.slice().reverse().forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'history-row';
+    row.innerHTML = `<span>${formatDate(h.at)}</span><span>streak: ${formatDuration(h.duration)}</span>`;
+    list.appendChild(row);
+  });
+}
+
+function tick() {
+  const start = getStart();
+  const elapsed = Date.now() - start;
+
+  const totalSec  = Math.floor(elapsed / 1000);
+  const totalMin  = Math.floor(totalSec / 60);
+  const totalHour = Math.floor(totalMin / 60);
+  const days      = Math.floor(totalHour / 24);
+
+  document.getElementById('days').textContent    = days;
+  document.getElementById('hours').textContent   = totalHour % 24;
+  document.getElementById('minutes').textContent = pad(totalMin % 60);
+  document.getElementById('seconds').textContent = pad(totalSec % 60);
+  document.getElementById('since-label').textContent = 'since ' + formatDate(start);
+
+  buildMilestones(elapsed);
+
+  let nextMilestone = null;
+  let currentMilestone = null;
+  for (let i = 0; i < MILESTONES.length; i++) {
+    if (elapsed >= MILESTONES[i].ms) currentMilestone = MILESTONES[i];
+    else if (!nextMilestone) nextMilestone = MILESTONES[i];
+  }
+
+  const motiv = document.getElementById('motivation-text');
+  if (currentMilestone) motiv.textContent = currentMilestone.msg;
+  else motiv.textContent = DEFAULT_MSGS[Math.floor(elapsed / 3600000) % DEFAULT_MSGS.length];
+
+  const nextBox = document.getElementById('next-box');
+  if (nextMilestone) {
+    nextBox.style.display = '';
+    document.getElementById('next-name').textContent = nextMilestone.label;
+    document.getElementById('next-rem').textContent  = formatRemaining(nextMilestone.ms - elapsed);
+  } else {
+    nextBox.style.display = 'none';
+  }
+}
+
+function showConfirm() {
+  document.getElementById('confirm-box').style.display = '';
+}
+function hideConfirm() {
+  document.getElementById('confirm-box').style.display = 'none';
+}
+function doReset() {
+  const start   = getStart();
+  const elapsed = Date.now() - start;
+  if (elapsed > 60000) {
+    const hist = getHistory();
+    hist.push({ at: Date.now(), duration: elapsed });
+    localStorage.setItem(KEY_HISTORY, JSON.stringify(hist));
+  }
+  localStorage.setItem(KEY_START, Date.now());
+  hideConfirm();
+  buildHistory();
+  tick();
+}
+
+function dismissHint() {
+  document.getElementById('install-hint').style.display = 'none';
+  localStorage.setItem(KEY_HINT, '1');
+}
+
+// Show install hint only in Safari on iPhone (not when already installed as PWA)
+function checkInstallHint() {
+  const standalone = window.navigator.standalone;
+  const safari = /iphone|ipad/i.test(navigator.userAgent) && /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+  const dismissed = localStorage.getItem(KEY_HINT);
+  if (safari && !standalone && !dismissed) {
+    document.getElementById('install-hint').style.display = '';
+  }
+}
+
+checkInstallHint();
+buildHistory();
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
